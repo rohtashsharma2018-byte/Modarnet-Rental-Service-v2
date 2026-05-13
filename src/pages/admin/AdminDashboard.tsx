@@ -2,8 +2,11 @@ import React, { useEffect, useState } from "react";
 import { collection, query, onSnapshot } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import { RentalRequest, Laptop, PurchaseRequest } from "../../types";
+import { useAuth } from "../../contexts/AuthContext";
+import { Shield, LayoutDashboard } from "lucide-react";
 
 export default function AdminDashboard() {
+  const { user, role } = useAuth();
   const [stats, setStats] = useState({ 
     requests: 0, 
     active: 0, 
@@ -60,6 +63,33 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
+      <div className="bg-gradient-to-r from-orange-500 to-amber-600 rounded-2xl p-6 text-white shadow-lg shadow-orange-100">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-extrabold tracking-tight">
+              Admin Portal: {user?.displayName || 'Administrator'}
+            </h1>
+            <div className="flex items-center gap-2 mt-1 opacity-90">
+              <span className="bg-white/20 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm border border-white/10">
+                {role || 'Admin'}
+              </span>
+              <span className="text-xs font-medium italic opacity-75">{user?.email}</span>
+            </div>
+          </div>
+          <div className="hidden md:block">
+             <div className="flex items-center gap-4 text-right">
+                <div>
+                   <div className="text-xs font-bold opacity-60 uppercase tracking-widest leading-none mb-1">Authorization</div>
+                   <div className="text-sm font-semibold">Elevated Privileges</div>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center border border-white/30 backdrop-blur-md">
+                   <Shield size={20} className="opacity-80" />
+                </div>
+             </div>
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <div className="text-slate-500 text-xs font-medium uppercase tracking-wider mb-1">Total Assets</div>

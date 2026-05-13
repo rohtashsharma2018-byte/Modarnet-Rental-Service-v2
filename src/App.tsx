@@ -11,6 +11,7 @@ const RentalRequestForm = React.lazy(() => import('./pages/user/RentalRequestFor
 const PurchaseRequestForm = React.lazy(() => import('./pages/user/PurchaseRequestForm'));
 const RentalHistory = React.lazy(() => import('./pages/user/RentalHistory'));
 const ViewInventory = React.lazy(() => import('./pages/user/ViewInventory'));
+const ContactUs = React.lazy(() => import('./pages/user/ContactUs'));
 
 const AdminDashboard = React.lazy(() => import('./pages/admin/AdminDashboard'));
 const Inventory = React.lazy(() => import('./pages/admin/Inventory'));
@@ -41,6 +42,7 @@ export default function App() {
                 <Route path="request" element={<RentalRequestForm />} />
                 <Route path="purchase" element={<PurchaseRequestForm />} />
                 <Route path="history" element={<RentalHistory />} />
+                <Route path="contact" element={<ContactUs />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </>
             ) : role === 'admin' ? (

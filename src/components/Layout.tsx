@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { logout } from "../lib/firebase";
 import { Button } from "./ui/button";
-import { LogOut, Monitor, User as UserIcon, Calendar, History, Package, ClipboardList, Clock } from "lucide-react";
+import { LogOut, Monitor, User as UserIcon, Calendar, History, Package, ClipboardList, Clock, HelpCircle } from "lucide-react";
 
 export const Layout: React.FC = () => {
   const { user, role } = useAuth();
@@ -15,6 +15,7 @@ export const Layout: React.FC = () => {
     { to: "/request", label: "Rental Request", icon: <Calendar className="w-4 h-4" /> },
     { to: "/purchase", label: "Purchase Request", icon: <Package className="w-4 h-4" /> },
     { to: "/history", label: "History", icon: <History className="w-4 h-4" /> },
+    { to: "/contact", label: "Contact Us", icon: <HelpCircle className="w-4 h-4" /> },
   ];
 
   const adminLinks = [

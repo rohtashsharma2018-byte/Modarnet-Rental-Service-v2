@@ -3,6 +3,18 @@ import { collection, query, onSnapshot } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import { Laptop } from "../../types";
 import { handleFirestoreError, OperationType } from "../../lib/firestoreErrorHandler";
+import { Folder } from "lucide-react";
+
+const isGdriveFolder = (url?: string) => {
+  return url && (url.includes('drive.google.com/drive/folders/') || url.includes('/folders/'));
+};
+
+const ensureAbsoluteUrl = (url?: string) => {
+  if (!url) return '';
+  const trimmed = url.trim();
+  if (trimmed.startsWith('http')) return trimmed;
+  return `https://${trimmed}`;
+};
 
 export default function ViewInventory() {
   const [laptops, setLaptops] = useState<Laptop[]>([]);
@@ -44,7 +56,29 @@ export default function ViewInventory() {
               {laptops.map(l => (
                 <tr key={l.id} className="hover:bg-slate-50/30 transition-colors">
                   <td className="px-4 py-3">
-                    <span className="font-bold text-slate-800 text-xs">{l.name}</span>
+                    <div className="flex items-center gap-3">
+                      {l.imageUrl ? (
+                        <a 
+                          href={ensureAbsoluteUrl(l.imageUrl)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="View Image/Folder"
+                          className="w-10 h-10 rounded-lg border border-slate-200 overflow-hidden bg-slate-100 flex-shrink-0 group relative cursor-pointer flex items-center justify-center" 
+                        >
+                          {isGdriveFolder(l.imageUrl) ? (
+                            <Folder size={20} className="text-blue-500 transition-transform group-hover:scale-110" />
+                          ) : (
+                            <img src={l.imageUrl} alt={l.name} className="w-full h-full object-cover transition-transform group-hover:scale-110" referrerPolicy="no-referrer" />
+                          )}
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+                        </a>
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-center flex-shrink-0">
+                          <span className="text-[10px] text-slate-300 font-bold uppercase">No Img</span>
+                        </div>
+                      )}
+                      <span className="font-bold text-slate-800 text-xs">{l.name}</span>
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-slate-500 text-xs max-w-[300px]" title={l.description}>
                     <p className="line-clamp-2">{l.description}</p>

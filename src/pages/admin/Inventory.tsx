@@ -5,6 +5,19 @@ import { Laptop } from "../../types";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { handleFirestoreError, OperationType } from "../../lib/firestoreErrorHandler";
+import { Trash2, Folder } from "lucide-react";
+
+// Helper to detect Google Drive folder link
+const isGdriveFolder = (url?: string) => {
+  return url && (url.includes('drive.google.com/drive/folders/') || url.includes('/folders/'));
+};
+
+const ensureAbsoluteUrl = (url?: string) => {
+  if (!url) return '';
+  const trimmed = url.trim();
+  if (trimmed.startsWith('http')) return trimmed;
+  return `https://${trimmed}`;
+};
 
 interface LaptopForm {
   name: string;
@@ -13,6 +26,7 @@ interface LaptopForm {
   price?: number;
   offerPricePerItem?: number;
   stock: number;
+  imageUrl?: string;
 }
 
 export default function Inventory() {
@@ -48,6 +62,7 @@ export default function Inventory() {
           price: data.price ? Number(data.price) : 0,
           offerPricePerItem: data.offerPricePerItem ? Number(data.offerPricePerItem) : 0,
           stock: Number(data.stock),
+          imageUrl: data.imageUrl || "",
           updatedAt: serverTimestamp()
         });
         toast.success("Laptop updated");
@@ -58,7 +73,7 @@ export default function Inventory() {
           price: data.price ? Number(data.price) : 0,
           offerPricePerItem: data.offerPricePerItem ? Number(data.offerPricePerItem) : 0,
           stock: Number(data.stock),
-          imageUrl: "", 
+          imageUrl: data.imageUrl || "", 
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
         });
@@ -81,7 +96,8 @@ export default function Inventory() {
       pricePerDay: laptop.pricePerDay, 
       price: laptop.price || 0, 
       offerPricePerItem: laptop.offerPricePerItem || 0,
-      stock: laptop.stock 
+      stock: laptop.stock,
+      imageUrl: laptop.imageUrl || ""
     });
     setIsDialogOpen(true);
   };
@@ -107,7 +123,7 @@ export default function Inventory() {
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
         <div className="p-4 border-b border-slate-100 flex justify-between items-center">
           <h3 className="font-bold text-slate-800 text-sm">Inventory Management</h3>
-          <button onClick={() => { setIsDialogOpen(true); setEditingLaptop(null); reset({name:'',description:'',pricePerDay:0,price:0,offerPricePerItem:0,stock:0}); }} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">
+          <button onClick={() => { setIsDialogOpen(true); setEditingLaptop(null); reset({name:'',description:'',pricePerDay:0,price:0,offerPricePerItem:0,stock:0,imageUrl:''}); }} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">
             + New Laptop
           </button>
         </div>
@@ -141,6 +157,11 @@ export default function Inventory() {
                   <label className="block text-xs font-medium text-slate-700 mb-1">Stock</label>
                   <input type="number" {...register("stock", { required: true })} className="w-full rounded border border-slate-300 px-3 py-1.5 text-sm" />
                 </div>
+                <div className="lg:col-span-3">
+                  <label className="block text-xs font-medium text-slate-700 mb-1">Image URL</label>
+                  <input {...register("imageUrl")} placeholder="Google Drive or direct image link" className="w-full rounded border border-slate-300 px-3 py-1.5 text-sm" />
+                  <p className="text-[10px] text-slate-400 mt-1 italic">Example: https://drive.google.com/uc?export=view&id=IMAGE_ID</p>
+                </div>
               </div>
               <div className="flex justify-end gap-2">
                 <button type="button" onClick={() => setIsDialogOpen(false)} className="px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-200 hover:bg-slate-300 rounded">Cancel</button>
@@ -167,7 +188,24 @@ export default function Inventory() {
               {laptops.map(l => (
                 <tr key={l.id} className="hover:bg-slate-50/50 transition-colors">
                   <td className="px-4 py-3">
-                    <span className="bg-slate-100 px-2 py-1 rounded border border-slate-200 text-xs font-mono">{l.name}</span>
+                    <div className="flex items-center gap-3">
+                      {l.imageUrl && (
+                        <a 
+                          href={ensureAbsoluteUrl(l.imageUrl)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Open Link"
+                          className="w-8 h-8 rounded border border-slate-200 overflow-hidden bg-slate-100 flex-shrink-0 flex items-center justify-center hover:border-blue-400 transition-colors group"
+                        >
+                          {isGdriveFolder(l.imageUrl) ? (
+                            <Folder size={14} className="text-blue-500 transition-transform group-hover:scale-110" />
+                          ) : (
+                            <img src={l.imageUrl} alt={l.name} className="w-full h-full object-cover transition-transform group-hover:scale-110" referrerPolicy="no-referrer" />
+                          )}
+                        </a>
+                      )}
+                      <span className="bg-slate-100 px-2 py-1 rounded border border-slate-200 text-xs font-mono">{l.name}</span>
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-slate-500 text-xs max-w-[200px] truncate" title={l.description}>{l.description}</td>
                   <td className="px-4 py-3 text-slate-600 text-xs">{l.price ? `₹${l.price}` : '-'}</td>
